@@ -1,10 +1,10 @@
 const express = require('express');
 const db = require('../data/dbConfig');
 
-const router = express.Router();
+const users = express.Router();
 
 // GET /api/users
-router.get('/', (req, res) => {
+users.get('/', (req, res) => {
   db('users').then(rows => {
     res.json(rows);
   })
@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/users:id
-router.get('/:id', (req, res) => {
+users.get('/:id', (req, res) => {
   const { id } = req.params;
   db('users').where('id', id).then(rows => {
     res.json(rows);
@@ -23,3 +23,5 @@ router.get('/:id', (req, res) => {
     res.status(500).json({ err: 'failed to find user' });
   });
 });
+
+module.exports = users;
