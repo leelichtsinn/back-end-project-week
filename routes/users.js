@@ -24,4 +24,50 @@ users.get('/:id', (req, res) => {
   });
 });
 
+// POST /api/users
+users.post('/', (req, res) => {
+  const user = req.body;
+  db('users').insert(user).then(userId => {
+    db('users').get(userId.id).then(user => {
+      res.status(201).json(userId);
+    });
+  })
+  .catch(err => {
+    res.status(500).json({ err: 'failed to insert user into db' });
+  });
+});
+
+// PUT /api/users/:id
+users.put('/:id', (req, res) => {
+  const user = req.body;
+  const { id } = req.params;
+  db('users').where({ id }).update(user).then(count => {
+    if (count) {
+      db('users').get({ id }).then(user => {
+        res.status(201).json(user);
+      });
+    } else {
+      res.status(404).json({ message: 'the user with the specifed ID does not exist' });
+    }
+  })
+  .catch(err => {
+    res.status(500).json({ err: 'user information could not be modified' });
+  });
+});
+
+// DELETE /api/cohorts/:id
+users.delete('/:id', (req, res) => {
+  const { id } = req.params;
+  db('users').where({ id }).del().then(count => {
+    if (count) {
+      res.json({ message: 'successfully deleted' });
+    } else {
+      res.status(404).json({ message: 'the user with the specifed ID does not exist' });
+    }
+  })
+  .catch(err => {
+    res.status(500).json({ err: 'the user could not be removed' });
+  });
+});
+
 module.exports = users;
