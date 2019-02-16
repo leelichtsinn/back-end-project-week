@@ -13,11 +13,28 @@ users.get('/', (req, res) => {
   });
 });
 
-// GET /api/users:id
+// GET /api/users/:id
 users.get('/:id', (req, res) => {
   const { id } = req.params;
   db('users').where('id', id).then(rows => {
     res.json(rows);
+  })
+  .catch(err => {
+    res.status(500).json({ err: 'failed to find user' });
+  });
+});
+
+// GET /api/users/:id/notes
+users.get('/:id/notes', (req, res) => {
+  const { id } = req.params;
+  db('users').where('id', id).then(user => {
+    db('notes').where('user_id', id).then(notes => {
+      res.json({
+        id: user[0].id,
+        name: user[0].username,
+        notes: [notes]
+      });
+    });
   })
   .catch(err => {
     res.status(500).json({ err: 'failed to find user' });
