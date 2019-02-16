@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const logger = require('morgan');
+const cors = require('cors');
 const knex = require('knex');
 
 const usersRoute = require('../routes/users');
@@ -11,6 +12,7 @@ const server = express();
 server.use(express.json());
 server.use(helmet());
 server.use(logger('dev'));
+server.use(cors());
 
 // routes
 server.use('/api/users', usersRoute);
