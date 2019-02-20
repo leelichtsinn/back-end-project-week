@@ -44,7 +44,7 @@ notes.put('/:id', (req, res) => {
   db('notes').where('id', id).update(note).then(count => {
     if (count) {
       db('notes').get({ id }).then(note => {
-        res.status(201).json(note);
+        res.status(201).json(note.id);
       });
     } else {
       res.status(404).json({ message: 'the note with the specified ID does not exist' });
