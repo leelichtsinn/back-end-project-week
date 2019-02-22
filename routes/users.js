@@ -1,7 +1,19 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const db = require('../data/dbConfig');
 
 const users = express.Router();
+
+function genToken(user) {
+  const payload = {
+    username: user.username
+  };
+  const options = {
+    expiresIn: '1h'
+  };
+  return jwt.sign(payload, secret, options);
+}
 
 // GET /api/users
 users.get('/', (req, res) => {
@@ -52,6 +64,23 @@ users.post('/register', (req, res) => {
   .catch(err => {
     res.status(500).json({ err: 'failed to insert user into db' });
   });
+});
+
+// POST /api/users/login
+users.post('/login', (req, res) => {
+  const creds = req.body;
+  db('users').where('username', creds.username)
+    .then(user => {
+      if (user && bcrypt.compareSync(creds.password, user[0].password)) {
+        const token = genToken(user);
+        res.json({ id: user.id, token });
+      } else {
+        res.status(400).json({ message: 'incorrect username or password' });
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
 
 // PUT /api/users/:id
