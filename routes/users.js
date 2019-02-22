@@ -41,8 +41,8 @@ users.get('/:id/notes', (req, res) => {
   });
 });
 
-// POST /api/users
-users.post('/', (req, res) => {
+// POST /api/users/register
+users.post('/register', (req, res) => {
   const user = req.body;
   db('users').insert(user).then(userId => {
     db('users').get(userId.id).then(user => {
