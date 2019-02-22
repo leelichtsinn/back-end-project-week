@@ -15,6 +15,50 @@ function genToken(user) {
   return jwt.sign(payload, secret, options);
 }
 
+function protect(req, res, next) {
+  const token = req.headers.authorization;
+  jwt.verify(token, secret, (err, decodedToken) => {
+    if (err) {
+      res.status(401).json({ message: 'invalid token' });
+    } else {
+      next();
+    }
+  });
+}
+
+// middleware to verify token
+users.use(protect);
+
+// POST /api/users/register
+users.post('/register', (req, res) => {
+  const user = req.body;
+  db('users').insert(user).then(userId => {
+    db('users').get(userId.id).then(user => {
+      res.status(201).json(userId);
+    });
+  })
+  .catch(err => {
+    res.status(500).json({ err: 'failed to insert user into db' });
+  });
+});
+
+// POST /api/users/login
+users.post('/login', (req, res) => {
+  const creds = req.body;
+  db('users').where('username', creds.username)
+  .then(user => {
+    if (user && bcrypt.compareSync(creds.password, user[0].password)) {
+      const token = genToken(user);
+      res.json({ id: user.id, token });
+    } else {
+      res.status(400).json({ message: 'incorrect username or password' });
+    }
+  })
+  .catch(err => {
+    res.status(500).json(err);
+  });
+});
+
 // GET /api/users
 users.get('/', (req, res) => {
   db('users').then(rows => {
@@ -53,35 +97,6 @@ users.get('/:id/notes', (req, res) => {
   });
 });
 
-// POST /api/users/register
-users.post('/register', (req, res) => {
-  const user = req.body;
-  db('users').insert(user).then(userId => {
-    db('users').get(userId.id).then(user => {
-      res.status(201).json(userId);
-    });
-  })
-  .catch(err => {
-    res.status(500).json({ err: 'failed to insert user into db' });
-  });
-});
-
-// POST /api/users/login
-users.post('/login', (req, res) => {
-  const creds = req.body;
-  db('users').where('username', creds.username)
-    .then(user => {
-      if (user && bcrypt.compareSync(creds.password, user[0].password)) {
-        const token = genToken(user);
-        res.json({ id: user.id, token });
-      } else {
-        res.status(400).json({ message: 'incorrect username or password' });
-      }
-    })
-    .catch(err => {
-      res.status(500).json(err);
-    });
-});
 
 // PUT /api/users/:id
 users.put('/:id', (req, res) => {
