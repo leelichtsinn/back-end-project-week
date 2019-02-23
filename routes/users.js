@@ -119,7 +119,7 @@ users.put('/:id', (req, res) => {
   });
 });
 
-// DELETE /api/cohorts/:id
+// DELETE /api/users/:id
 users.delete('/:id', (req, res) => {
   const { id } = req.params;
   db('users').where({ id }).del().then(count => {
