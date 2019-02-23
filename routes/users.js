@@ -5,6 +5,8 @@ const db = require('../data/dbConfig');
 
 const users = express.Router();
 
+const secret = process.env.PRIVATE_KEY || 'secretKey';
+
 function genToken(user) {
   const payload = {
     username: user.username
@@ -32,6 +34,7 @@ function protect(req, res, next) {
 // POST /api/users/register
 users.post('/register', (req, res) => {
   const user = req.body;
+  user.password = bcrypt.hashSync(user.password, 10);
   db('users').insert(user).then(userId => {
     db('users').get(userId.id).then(user => {
       res.status(201).json(userId);
