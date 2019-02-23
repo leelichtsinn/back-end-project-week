@@ -26,8 +26,8 @@ function protect(req, res, next) {
   });
 }
 
-// middleware to verify token
-users.use(protect);
+// // middleware to verify token
+// users.use(protect);
 
 // POST /api/users/register
 users.post('/register', (req, res) => {
